@@ -1,5 +1,6 @@
 import os
 from bson import ObjectId
+from celery import Celery
 from flask import Flask, render_template, request, redirect, url_for, jsonify, Response, json
 from flask_pymongo import PyMongo
 from werkzeug.utils import secure_filename
@@ -9,23 +10,27 @@ from helpers.csv_helpers import readCSV
 from helpers.generic_helpers import ListConverter
 
 
-UPLOAD_FOLDER = 'C:\\Users\\Ana Ash\\Desktop\\Aldrin\\Project\\Dump'
 ALLOWED_EXTENSIONS = set(['csv'])
 
 app = Flask(__name__)
 
-app.url_map.converters['list'] = ListConverter
-
-app.config.from_pyfile('config.cfg')  # Using the config file for setting up
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # debug: reload jinja templates
 app.jinja_env.auto_reload = True
 
 # remove cache limit (default is 50 templates)
 app.jinja_env.cache = {}
 
+# custom list mapper for routes
+app.url_map.converters['list'] = ListConverter
+
+app.config.from_pyfile('config.cfg')  # Using the config file for setting up
+
 # Pymongo Connections
 mongo = PyMongo(app)
+
+# celery connections
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'], backend=app.config['CELERY_RESULT_BACKEND'])
+
 
 
 def allowed_file(filename):
@@ -92,100 +97,142 @@ def getuser():
     _all_users_document = list(_users_collections.find())  # get all the documents from user collections
     return jsonify(JSONEncoder().encode(_all_users_document))
 
+
+@app.route('/status/<task_id>')
+def taskstatus(task_id):
+    _task = scrapping_task.AsyncResult(task_id)
+    if _task.state == 'PENDING':
+        # job did not start yet
+        response = {
+            'state': _task.state,
+            'current': 0,
+            'total': 1,
+            'status': 'Pending...'
+        }
+    elif _task.state != 'FAILURE':
+        response = {
+            'state': _task.state,
+            'current': _task.info.get('current', 0),
+            'total': _task.info.get('total', 1),
+            'status': _task.info.get('status', '')
+        }
+        if 'result' in _task.info:
+            response['result'] = _task.info['result']
+    else:
+        # something went wrong in the background job
+        response = {
+            'state': _task.state,
+            'current': 1,
+            'total': 1,
+            'status': str(_task.info),  # this is the exception raised
+        }
+    return jsonify(response)
+
 @app.route('/progress', methods=['POST'])
 def progress():
     """
     Progress page <all crawling mechanism starts here>
     :return:
     """
-<<<<<<< HEAD
-    global SCRAPE_COMPLETE
-    global SCRAPPING_INPROGRESS
-    if not SCRAPPING_INPROGRESS:
-        SCRAPPING_INPROGRESS = True
-        # global LIKERS_NAME
-        # start the crawler and execute a callback when complete
-        # eventual = crawl_runner.crawl(FacebookSpider(base_url=["https://www.facebook.com/5min.crafts/videos/286999302029750/"]))
-        # eventual.addCallback(finished_scrape)
+    _selections = request.form.get('selections')
+    _activeLink = request.form.get("postlink")
+    _scrap_link = get_post(_activeLink)
 
-        # SETUP the Correct driver
+    _task = scrapping_task.apply_async(args=[_selections, _scrap_link])
 
-        if (request.form.get("MacWin") == "mac"):
-            if (request.form.get("browser") == "chrome"):
-                DRIVER = get_driver("mac", "chrome")
-            elif (request.form.get("browser") == "firefox"):
-                DRIVER = get_driver("mac", "firefox")
-            elif (request.form.get("browser") == "opera"):
-                DRIVER = get_driver("mac", "opera")
+    return render_template('progress.html', _post=_scrap_link, _task = _task.id)
 
-        elif (request.form.get("MacWin") == "windows"):
-            if (request.form.get("browser") == "chrome"):
-                DRIVER = get_driver("windows", "chrome")
-            elif (request.form.get("browser") == "firefox"):
-                DRIVER = get_driver("windows", "firefox")
-            elif (request.form.get("browser") == "opera"):
-                DRIVER = get_driver("windows", "opera")
-        
-        elif (request.form.get("MacWin") == "linux"):
-            if (request.form.get("browser") == "chrome"):
-                DRIVER = get_driver("linux", "chrome")
-            elif (request.form.get("browser") == "firefox"):
-                DRIVER = get_driver("linux", "firefox")
-            elif (request.form.get("browser") == "opera"):
-                DRIVER = get_driver("linux", "opera")
 
-        _username = request.form.get("username")
-        _password = request.form.get("password")
-        # try login to facebook using request
+    # return render_template('progress.html')
 
-        login(DRIVER, _username, _password)
+    #
+    #         for i in _link_to_scrap:
 
-=======
-    _jobs_collections = mongo.db.jobs                   # get the jobs collections from mongo db
-    _users_collections = mongo.db.users                 # get the users collections from mongo db
 
+    #                                       # close driver
+    #
+    #         _job_list = []
+    #         for j in _id_list:
+    #             _jobs = _jobs_collections.find_one({"_id": ObjectId(j)})
+    #             _job_list.append(_jobs)
+    #
+    #         return render_template('results.html', _list_of_jobs = _job_list)
+    #     else:
+    #         close(DRIVER)
+    #         return render_template("error.html", _error="username password combination wrong")
+    # else:
+    #     return render_template("error.html", _error = f"No User profile matched with {_selections} on Database")
+
+    # elif SCRAPE_COMPLETE:
+    #     return render_template('progress.html', _progress = "Scrapping completed")
+
+    # return render_template('progress.html', _progress = "Scrapping is in progress")
+
+@celery.task(bind=True)
+def scrapping_task(self, _user, _scrapLink):
+    _jobs_collections = mongo.db.jobs  # get the jobs collections from mongo db
+    _users_collections = mongo.db.users  # get the users collections from mongo db
     _id_list = []
-    _selections = request.form.get("selections")        # get selection values from front end
-    _get_user = _users_collections.find_one({"user": _selections})  # find matching documents from mongo
-    _link_to_scrap = get_post()                         # list of links to scrape
-    if _get_user != None:                               # error checking when document not found
+    _get_user = _users_collections.find_one({"user": _user})  # find matching documents from mongo
+    _total = 100
+    if _get_user != None:  # error checking when document not found
         DRIVER = setup_drivers(_get_user["os"], _get_user["browser"])  # Setup the correct driver
         login(DRIVER, _get_user["user"], _get_user["pass"])  # try login to facebook
 >>>>>>> 9cc9ff1b9d425989593b72880270156d2bc86442
         if DRIVER.current_url == "https://m.facebook.com/login/save-device/?login_source=login#_=_":  # login success
-            for i in _link_to_scrap:
+            self.update_state(state='Logging in..',
+                              meta={'current': 5, 'total': _total,
+                                    'status': 200})
+            for i in _scrapLink:
                 DRIVER.get(i)                           # get the scrapping page
+                self.update_state(state=f'Getting URL {i}',
+                                  meta={'current': 10, 'total': _total,
+                                        'status': 200})
+
                 _commenters_name, _commenters_profile = get_commenters(DRIVER)  # get Commenters
+
+                self.update_state(state='Getting commenters',
+                                  meta={'current': 15, 'total': _total,
+                                        'status': 200})
                 _likers_name, _likers_profile = get_likers(DRIVER)  # get likers
+
+                self.update_state(state='Getting likers',
+                                  meta={'current': 20, 'total': _total,
+                                        'status': 200})
                 likers = get_profile_like(DRIVER, _likers_name, _likers_profile)  # get likers like
+                self.update_state(state='Getting Likers profile likes',
+                                  meta={'current': 50, 'total': _total,
+                                        'status': 200})
                 commenters = get_profile_like(DRIVER, _commenters_name, _commenters_profile)  # get commenters like
+                self.update_state(state='Getting commenters profile likes',
+                                  meta={'current': 80, 'total': _total,
+                                        'status': 200})
                 _data = {
                     "Post": i,
                     "Likers": likers,
                     "Commenters": commenters,
                     "DateStamp": str(get_curr_date_time(_strft="%b/%d/%Y %H\u002E%M"))
                 }
+                self.update_state(state='Inserting data into mongo',
+                                  meta={'current': 95, 'total': _total,
+                                        'status': 200})
                 id_ = _jobs_collections.insert_one(_data)
 
-                _id_list.append(id_.inserted_id)
-            close(DRIVER)                               # close driver
+                _id_list.append(JSONEncoder().encode(id_.inserted_id))
 
-            _job_list = []
-            for j in _id_list:
-                _jobs = _jobs_collections.find_one({"_id": ObjectId(j)})
-                _job_list.append(_jobs)
-
-            return render_template('results.html', _list_of_jobs = _job_list)
-        else:
             close(DRIVER)
-            return render_template("error.html", _error="username password combination wrong")
-    else:
-        return render_template("error.html", _error = f"No User profile matched with {_selections} on Database")
+    return {'current': 100, 'total': _total, 'status': 'Scrape Complete',
+            'result': _id_list}
 
-    # elif SCRAPE_COMPLETE:
-    #     return render_template('progress.html', _progress = "Scrapping completed")
 
-    # return render_template('progress.html', _progress = "Scrapping is in progress")
+
+
+
+
+
+
+
+
 
 @app.route('/error', methods=['GET'])
 def error():
@@ -249,17 +296,17 @@ def setup_drivers(_os, _browser):
         elif (_browser == "opera"):
             return get_driver("windows", "opera")
 
-def get_post():
+def get_post(_activePost):
     """
     functions to get the input scrapping post url
     :return: a list
     """
     _link = []
-    if (request.form.get("postlink") == "postLink1"):
+    if (_activePost == "postLink1"):
         _scrapping_link = request.form.get("singlePost")
         _processed_link = _scrapping_link.replace("www", "m")
         _link.append(_processed_link)
-    elif (request.form.get("postlink") == "postLink2"):
+    elif (_activePost == "postLink2"):
         file = request.files['csvfile']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -267,7 +314,6 @@ def get_post():
             _scrapping_link = readCSV(os.path.join(app.config['UPLOAD_FOLDER'], file.filename), "URL")
             for i in _scrapping_link:
                 _link.append(i.replace("www", "m"))
-
     return _link
 
 @app.route("/downloadCSV", methods=["POST"])
@@ -287,20 +333,33 @@ def downloadCSV():
 
     if request.method == "POST":
         _data = request.json['data']
-        print(_data)
-        real_data = flattenjson(_data, "__")
 
-        f = csv.writer(open("test.csv", "wb+"))
-    # csv = f'No.,Likers,Their Likings,URL Links,Commenters,Thier Likings,URL Links\n'
-    # for i in _var:
-    #     csv = csv + i["Post"] + "\n"
+        real_data = flattenjson(_data, "__")
+        print(json.loads(_data))
+        print(real_data)
 
         outfile = str(get_curr_date_time()) + ".csv"
-        return Response(
-            _data,
-            mimetype="text/csv",
-            headers={"Content-disposition":
-                 f"attachment; filename={outfile}"})
+        # return Response(
+        #     csv,
+        #     mimetype="text/csv",
+        #     headers={"Content-disposition":
+        #          f"attachment; filename={outfile}"})
+
+# celery tasks ======================================================
+
+
+@celery.task(bind=True)
+def scrape_likers(self):
+    pass
+@celery.task(bind=True)
+def scrape_commenters(self):
+    pass
+@celery.task(bind=True)
+def scrape_profile_likes(self):
+    pass
+@celery.task(bind=True)
+def dumping_data_into_mongo(self):
+    pass
 
 if __name__ == '__main__':
     app.run()

@@ -23,6 +23,7 @@ Download (Extras):
 - [Python 3.6](https://www.python.org/)
 - [VS CODE](https://code.visualstudio.com/)
 - [Google Chrome](https://www.google.com/chrome/?brand=CHBD&gclid=Cj0KCQjwi8fdBRCVARIsAEkDvnI_-Usd4sWPkamFkNA7G9MRls59EqPNbwY4Nu6YpvKKOQqoMw4kSV0aAqS9EALw_wcB&gclsrc=aw.ds.ds&dclid=CLrPjYCC5t0CFURnjgod4sgNdw)
+- [Rabbit MQ](https://www.rabbitmq.com/install-standalone-mac.html)
 
 Configuration the settings for flask can be found on ```config.cfg``` file. Edit it to get your desired settings
 
@@ -40,7 +41,12 @@ make sure the webdriver for mac has read and write access
 
 N.B: Here mongo used with URI from mlab, use your own mongo environment if you chnage the database URL in ```config.cfg``` file
 
-navigate to the root folder
+navigate to the root folder and open two terminal
+* in first terminal run
+```
+sudo celery -A app.celery worker --pool=solo -l info
+```
+* in second terminal
 ```
 sudo python app.py
 ```

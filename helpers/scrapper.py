@@ -170,7 +170,6 @@ def get_commenters(_driver):
     soup3 = BeautifulSoup(html_doc, 'lxml')
 
     all_blocks = soup3.findAll('div', {'class':'_2b05'})
-    print(all_blocks)
     for blocks in all_blocks:
         profile_link = blocks.find("a")['href']
         # absolute link
