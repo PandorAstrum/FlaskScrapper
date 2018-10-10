@@ -151,7 +151,6 @@ def get_likers(_driver):
         name = b.find("strong").text                            # finding the name
         if "." in name:
             name = name.replace(".", "")
-        print(name)
         _likers_name_list.append(name)                          # adding the name to the list
 
     return _likers_name_list, _likers_profile_list              # return the two list
@@ -181,7 +180,6 @@ def get_commenters(_driver):
         name = blocks.find("a").text
         if "." in name:
             name = name.replace(".", "")
-        print(name)
         _commenters_name_list.append(name)
 
     return _commenters_name_list, _commenters_profile_list
@@ -194,57 +192,58 @@ def get_profile_like(_driver, _list, _url_list):
     :param _url_list: list of urls
     :return: dictionary with names and their likes
     """
-    _profile_likes = {}                                             # the dictionary that will be returned
-    _iterator = 0                                                   # simple integer to iterate through names list
+    _profile_likes = {}                                                     # the dictionary that will be returned
+    _profile_likes_link = {}                                                # the dictionary that will be returned
+    _iterator = 0                                                           # simple integer to iterate through names list
     for i in _url_list:
-        current_name = _list[_iterator]                             # get the name of the profile is scrapping now
-        _liked_item = []                                            # the list that holds all the liked item for a given profile
-        _driver.get(i)                                              # load the profile
-        time.sleep(1.0)                                             # wait to load the page
+        current_name = _list[_iterator]                                     # get the name of the profile is scrapping now
+        _driver.get(i)                                                      # load the profile
+        time.sleep(1.0)                                                     # wait to load the page
 
         # check if the profile is a page or not
         try:
             _flags = _driver.find_element_by_xpath("//*[contains(text(), 'Reviews')]") # its a page
         except NoSuchElementException:
-            _flags = None                                           # Its not a page
+            _flags = None                                                   # Its not a page
 
         if _flags == None:
             _about_page = WebDriverWait(_driver, 10).until(
                 EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'About')]")))   # locate the about page
-            _about_page.click()                                     # clicking the about page
-            fast_scroll(_driver=_driver)                            # scroll to reveal likes
-            time.sleep(1.0)                                         # wait to load the pages
+            _about_page.click()                                             # clicking the about page
+            fast_scroll(_driver=_driver)                                    # scroll to reveal likes
+            time.sleep(1.0)                                                 # wait to load the pages
             try:
                 _likes = _driver.find_element_by_xpath("//*[contains(text(), 'Likes')]")
             except NoSuchElementException or TimeoutException:
-                _likes = None                                       # likes button restricted or hidden by profile
+                _likes = None                                               # likes button restricted or hidden by profile
 
             if _likes != None:
-                _likes.find_element_by_xpath("../../..").click()    # locate the parent button to click
-                time.sleep(2.0)                                     # wait for the page to load
+                _likes.find_element_by_xpath("../../..").click()            # locate the parent button to click
+                time.sleep(2.0)                                             # wait for the page to load
 
                 _all_likes = WebDriverWait(_driver, 10).until(
                     EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'All Likes')]"))) # locate the all likes
-                _all_likes.find_element_by_xpath("../../../..").click()# get the all likes parents and click
-                time.sleep(1.0)                                     # wait for the page to load
-                fast_scroll(_driver=_driver)                        # scroll to reveal more
-                time.sleep(1.0)                                     # wait to load the page
-                html_doc_likes = _driver.page_source                # dump the page
-                soup2 = BeautifulSoup(html_doc_likes, 'lxml')       # make soup to navigate the html
-                b = soup2.findAll('div', {'class': '_1a5p'})        # get all the liked item
+                _all_likes.find_element_by_xpath("../../../..").click()     # get the all likes parents and click
+                time.sleep(1.0)                                             # wait for the page to load
+                fast_scroll(_driver=_driver)                                # scroll to reveal more
+                time.sleep(1.0)                                             # wait to load the page
+                html_doc_likes = _driver.page_source                        # dump the page
+                soup2 = BeautifulSoup(html_doc_likes, 'lxml')               # make soup to navigate the html
+                b = soup2.findAll('div', {'class': '_1a5p'})                # get all the liked item
 
                 for j in b:
                     _liked_item_text = j.find('div', {'class': '_1a5r'}).find('span').text   # get the text
-                    _liked_item.append(_liked_item_text)
-
-                _profile_likes[current_name] = _liked_item          # put it on dictionary
+                    if "." in _liked_item_text:
+                        _liked_item_text = _liked_item_text.replace(".", "")
+                    _link = j.find('a')['href']
+                    _link_processed = "https://www.facebook.com" + _link
+                    _profile_likes_link[_liked_item_text] = _link_processed
+                _profile_likes[current_name] = _profile_likes_link          # put it on dictionary
             else:
-                _profile_likes[current_name] = ['Empty or Restricted']# put it on dictionary in case not found
+                _profile_likes[current_name] = {'Empty or Restricted': "Empty or Restricted"}      # put it on dictionary in case not found
         else:
             pass
-        time.sleep(1.0)                                             # wait one seconds
-        _iterator += 1                                              # increase the iterator
+        time.sleep(1.0)                                                     # wait one seconds
+        _iterator += 1                                                      # increase the iterator
         print(_iterator)
-    return _profile_likes                                           # return the dictionary
-
-
+    return _profile_likes                                                   # return the dictionary

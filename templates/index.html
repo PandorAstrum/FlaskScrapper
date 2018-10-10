@@ -16,9 +16,8 @@
         <!-- Bootstrap core JavaScript
     ================================================== -->
         <!-- Placed at the end of the document so the pages load faster -->
-        <script src="../static/js/jquery.min.js"></script>
         <div class="container">
-            <form action="{{ url_for('progress') }}" method="POST">
+            <form method="POST" action="{{ url_for('progress') }}" enctype="multipart/form-data">
             <div class="row" style="color: #ffffff; text-align: center; align-items: center; justify-content: center;">
                 <!-- header -->
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
@@ -28,6 +27,7 @@
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
                     <hr />
                 </div>
+<<<<<<< HEAD
                 <!-- Mac Windows Button Group -->
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" style="margin-top: 1%; margin-bottom: 1%;">
                     <div class="btn-group" data-toggle="buttons">
@@ -41,40 +41,60 @@
                             <input type="radio" name="MacWin" value="linux" autocomplete="off">&nbsp;Linux
                         </label>
                     </div>
+=======
+                <!-- GO to userprofile -->
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-center">
+                    <button type="button" class="btn btn-light" onclick="window.location.href='{{ url_for('userprofile') }}';">Go To User Profile</button>
+>>>>>>> 9cc9ff1b9d425989593b72880270156d2bc86442
                 </div>
-                <!-- Browser Button Group -->
-                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" style="margin-top: 1%; margin-bottom: 1%;">
-                    <div class="btn-group" data-toggle="buttons">
-                        <label class="btn btn-secondary active" id="browserbtn">
-                            <input type="radio" name="browser" value="chrome" autocomplete="off" checked="">&nbsp;Chrome
-                        </label>
-                        <label class="btn btn-secondary" id="browserbtn">
-                            <input type="radio" name="browser" value="firefox" autocomplete="off">&nbsp;Fire Fox
-                        </label>
-                        <label class="btn btn-secondary" id="browserbtn">
-                            <input type="radio" name="browser" value="opera" autocomplete="off">&nbsp;Opera
-                        </label>
-                    </div>
-                </div>
-                <!-- Login Fields -->
+                <!-- separator -->
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
-                    <!-- Enable Group -->
-                    <div class="row" id="login1" style="justify-content: center;margin-top: 1%;margin-bottom: 1%;">
+                    <hr />
+                </div>
+                <!-- Select a user profile -->
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" style="margin-top: 1%; margin-bottom: 1%;">
+                    <div class="form-group">
+                        <label for="formcontrolselections">Select a Profile</label>
+                        <select class="form-control" id="formcontrolselections" name="selections">
+                            <option value="None">None</option>
+                            {% for j in _user_data %}
+                                <option value="{{ j['user'] }}">{{ j["user"] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                </div>
+                <!-- show its data -->
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    <div class="row">
                         <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
-                            <input type="text" name="username" class="form-control" placeholder="Username">
+                            <label>OS : </label>
+                            <label id="os"></label>
                         </div>
                         <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
-                            <input type="password" name="password" class="form-control" placeholder="Password">
+                            <label>Browser : </label>
+                            <label id="browser"></label>
                         </div>
                     </div>
                 </div>
+
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" style="margin-top: 1%; margin-bottom: 1%;">
+                    <div class="row" style="justify-content: center;">
+
+                        <div class="col-4 col-sm-4 col-md-4 col-lg-4 col-xl-4">
+
+                        </div>
+
+                    </div>
+                </div>
+
                 <!-- Post Link Radio Button Group -->
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" style="margin-top: 1%; margin-bottom: 1%;">
                     <div class="btn-group" data-toggle="buttons">
-                        <label class="btn btn-secondary active" id="postLink" onclick="handleImport($(this))">
+                        <label class="btn btn-secondary active" id="postLink">
                             <input type="radio" name="postlink" value="postLink1" autocomplete="off" checked="">&nbsp;Single Post Link
                         </label>
-                        <label class="btn btn-secondary" id="postLink" onclick="handleImport($(this))">
+                        <label class="btn btn-secondary" id="postLink">
                             <input type="radio" name="postlink" value="postLink2" autocomplete="off">&nbsp;Multiple Post Link
                         </label>
                     </div>
@@ -88,16 +108,16 @@
                         </div>
                         <!-- multiple post -->
                         <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" id="postLink2">
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
-                                </div>
-                                <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01">
-                                    <label class="custom-file-label" for="inputGroupFile01">Choose CSV file</label>
+                            <div class="input-group mb-3 ">
+                                <div class="custom-file justify-content-center">
+                                    <input type="file" name="csvfile">
+{#                                    <label class="custom-file-label" for="inputGroupFile01">Choose CSV file</label>#}
                                 </div>
                             </div>
                         </div>
+
+{#                        <input type="file" name="csvfile">#}
+
                     </div>
                 </div>
                 <!-- Scrap Button -->
@@ -108,6 +128,7 @@
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
                     <hr />
                 </div>
+
                 <!-- Previous JOB Table -->
                 <div class="col-md-12 col-12 col-sm-12 col-lg-12 col-xl-12" style="margin-top: 1%;
     margin-bottom: 1%;">
@@ -122,11 +143,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for i in _data %}
+                            {% for i in _job_data %}
                             <tr>
                                 <th scope="row">{{ loop.index }}</th>
                                 <td>
-                                    <a href={{ url_for('results', _jobs_id=i["_id"]) }}>{{ i["Post"] }}</a>
+                                    <a href={{ url_for('results', _jobs_id_list=[(i["_id"])]) }}>{{ i["Post"] }}</a>
                                 </td>
                                 <td>{{ i["DateStamp"] }}</td>
                             </tr>
@@ -137,10 +158,83 @@
             </div>
             </form>
         </div>
+        <script src="../static/js/jquery.min.js"></script>
         <script src="../static/js/popper.js"></script>
         <script src="../static/js/bootstrap.min.js"></script>
         <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
         <script src="../static/js/ie10-viewport-bug-workaround.js"></script>
         <script src="../static/js/index.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+            // get data from mongo
+                var _data;
+                req = $.ajax({
+                    url: '/getuser',
+                    type: 'GET',
+                });
+                req.done(function (data) {
+                    _data = $.parseJSON(data);
+                });
+
+            // dropdown text matcher
+                $("#formcontrolselections").change(function(){
+                    for (let i = 0; i < _data.length; i++) {
+                        if ($(this).val() == _data[i]["user"]){
+                            $("label[id='os']").html(_data[i]["os"]);
+                            $("label[id='browser']").html(_data[i]["browser"]);
+                        } else if ($(this).val() == "None"){
+                            $("label[id='os']").html("Not Available");
+                            $("label[id='browser']").html("Not Available");
+                        }
+                    }
+                });
+            // hide and show post link
+                var ps1 = $("div[id='postLink1']");
+                var ps2 = $("div[id='postLink2']");
+                ps1.show();
+                ps2.hide();
+
+                $("label[id='postLink']").click(function () {
+                    var link = $(this).children().first().val();
+                    if (link == "postLink1"){
+                        ps1.show();
+                        ps2.hide();
+                    } else if (link == "postLink2"){
+                        ps1.hide();
+                        ps2.show();
+                    }
+                });
+            });
+
+
+
+        function update_progress(status_url, nanobar, status_div) {
+            // send GET request to status URL
+            $.getJSON(status_url, function(data) {
+                // update UI
+                percent = parseInt(data['current'] * 100 / data['total']);
+                nanobar.go(percent);
+                $(status_div.childNodes[1]).text(percent + '%');
+                $(status_div.childNodes[2]).text(data['status']);
+                if (data['state'] != 'PENDING' && data['state'] != 'PROGRESS') {
+                    if ('result' in data) {
+                        // show result
+                        $(status_div.childNodes[3]).text('Result: ' + data['result']);
+                    }
+                    else {
+                        // something unexpected happened
+                        $(status_div.childNodes[3]).text('Result: ' + data['state']);
+                    }
+                }
+                else {
+                    // rerun in 2 seconds
+                    setTimeout(function() {
+                        update_progress(status_url, nanobar, status_div);
+                    }, 1000);
+                }
+            });
+        }
+
+        </script>
     </body>
 </html>

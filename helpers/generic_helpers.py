@@ -3,11 +3,16 @@
 __author__ = "Ashiquzzaman Khan"
 __desc__ = "Generic files to help in various task"
 """
+import json
 from datetime import datetime
+from bson import ObjectId
+from werkzeug.routing import BaseConverter
 
 __all__ = [
     "get_curr_date_time",
     "get_outputFile",
+    "ListConverter",
+    "JSONEncoder",
     "SCRAPPING_LIKERS",
     "SCRAPPING_COMMENTERS",
     "SCRAPPING_LIKERS_LIKE",
@@ -68,3 +73,19 @@ TEST_JSON_DUMPS = { "job1":
     }
 }
 
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return json.JSONEncoder.default(self, o)
+
+
+class ListConverter(BaseConverter):
+
+    def to_python(self, value):
+        return value.split('+')
+
+    def to_url(self, values):
+
+        return '+'.join(BaseConverter.to_url(self, value)
+                        for value in values)

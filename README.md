@@ -1,4 +1,4 @@
-# Flask Web App With Scrapy Framework
+# Flask Web App With Selenium and Beautiful Soup
 > A simple flask app integrated with selenium to run over facebook to mine data
 > also using embedded twisted reactor along with gunicorn WSGI server for Heorku Usage
 
@@ -24,24 +24,30 @@ Download (Extras):
 - [VS CODE](https://code.visualstudio.com/)
 - [Google Chrome](https://www.google.com/chrome/?brand=CHBD&gclid=Cj0KCQjwi8fdBRCVARIsAEkDvnI_-Usd4sWPkamFkNA7G9MRls59EqPNbwY4Nu6YpvKKOQqoMw4kSV0aAqS9EALw_wcB&gclsrc=aw.ds.ds&dclid=CLrPjYCC5t0CFURnjgod4sgNdw)
 
-Configure the settings for flask can be found on ```config.cfg``` file. Edit it to get your desired settings
+Configuration the settings for flask can be found on ```config.cfg``` file. Edit it to get your desired settings
 
 ```Binary``` folders contains all the web drivers for both mac and windows.
 
 ## Usage example (Development Environment)
 
-To run the flask project:
+To run the flask project on MAC:
+
+make sure the webdriver for mac has read and write access
+* Select the webdriver, then choose File > Get Info, or press Command-I.
+* Click the disclosure triangle next to Sharing & Permissions to expand the section.
+* Click the pop-up menu next to your user name to see the permissions settings. ...
+* Change the permissions to either Read & Write or “Read only.”
+
+N.B: Here mongo used with URI from mlab, use your own mongo environment if you chnage the database URL in ```config.cfg``` file
 
 navigate to the root folder
 ```
-python app.py
+sudo python app.py
 ```
 
 ## Helpers Library
 # csv_helpers.py
 > Library that helps on writing csv file and reading csv file
-# db_helpers.py
-> Library that helps on communicating with mongo db
 # generic_helpers.py
 > Library that helps on various task such as get download file name or get time in provided format
 # scrapper.py

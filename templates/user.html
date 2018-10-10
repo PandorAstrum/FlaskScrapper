@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="Ashiquzzaman Khan">
+        <title>Users</title>
+        <!-- Bootstrap core CSS -->
+        <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+        <!-- Custom styles for this template -->
+        <link href="../static/css/style.css" rel="stylesheet">
+    </head>
+    <body style="background-color: #222222;">
+        <!-- Bootstrap core JavaScript
+    ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="../static/js/jquery.min.js"></script>
+        <div class="container">
+            <form action="{{ url_for('index') }}" method="POST" onsubmit="return checkTextField(this)">
+            <div class="row" style="color: #ffffff; text-align: center; align-items: center; justify-content: center;">
+                <!-- header -->
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    <h2>User Profile Settings</h2>
+                </div>
+                <!-- separator -->
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    <hr />
+                </div>
+                <!-- Back Button -->
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-center">
+                    <button type="button" class="btn btn-light" onclick="window.location.href='{{ url_for('index') }}';">Back To Home</button>
+                </div>
+                <!-- separator -->
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    <hr />
+                </div>
+                <!-- New / EDIT  Button Group -->
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-secondary active" id="userprofile">
+                            <input type="radio" name="userprofile" value="new" autocomplete="off" checked="">&nbsp;New Profile
+                        </label>
+                        <label class="btn btn-secondary" id="userprofile">
+                            <input type="radio" name="userprofile" value="edit" autocomplete="off">&nbsp;Edit Profile
+                        </label>
+                    </div>
+                </div>
+                <!-- separator -->
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    <hr />
+                </div>
+                <!-- NEW / EDIT FIELDS -->
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" style="margin-top: 1%; margin-bottom: 1%;">
+                    <div class="row">
+                        <!-- new group -->
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" id="new">
+                            <div class="row">
+                                <!-- os selection -->
+                                <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+                                    <label> Choose Your OS : </label>
+                                    <div class="btn-group" data-toggle="buttons">
+                                        <label class="btn btn-secondary active" id="macwinbtn">
+                                            <input type="radio" name="MacWinNew" value="mac" autocomplete="off" checked="">&nbsp;MAC
+                                        </label>
+                                        <label class="btn btn-secondary" id="macwinbtn">
+                                            <input type="radio" name="MacWinNew" value="windows" autocomplete="off">&nbsp;Windows
+                                        </label>
+                                    </div>
+                                </div>
+                                <!-- browser selection -->
+                                <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+                                    <label> Choose Your Browser : </label>
+                                    <div class="btn-group" data-toggle="buttons">
+                                        <label class="btn btn-secondary active" id="browserbtn">
+                                            <input type="radio" name="browserNew" value="chrome" autocomplete="off" checked="">&nbsp;Chrome
+                                        </label>
+                                        <label class="btn btn-secondary" id="browserbtn">
+                                            <input type="radio" name="browserNew" value="firefox" autocomplete="off">&nbsp;Fire Fox
+                                        </label>
+                                        <label class="btn btn-secondary" id="browserbtn">
+                                            <input type="radio" name="browserNew" value="opera" autocomplete="off">&nbsp;Opera
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                    <label> LOGIN CREDENTIALS </label>
+                                </div>
+                                <!-- login Username -->
+                                <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+                                    <input type="text" name="usernameNew" class="form-control" placeholder="Username">
+                                </div>
+                                <!-- login Password -->
+                                <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+                                    <input type="password" name="passwordNew" class="form-control" placeholder="Password">
+                                </div>
+                                <!-- separator -->
+                                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                    <hr />
+                                </div>
+                                <!-- Buttons for save -->
+                                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                    <button type="submit" class="btn btn-light">Save Credentials</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- edit group -->
+                        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" id="edit">
+                            <!-- Selections -->
+                            <div class="form-group">
+                                <label for="formcontrolselections">Select a Profile</label>
+                                <select class="form-control" id="formcontrolselections" name="selections">
+                                    <option value="None">None</option>
+                                    {% for j in _user_data %}
+                                        <option value="{{ j['user'] }}">{{ j["user"] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="row">
+                                <!-- os selection -->
+                                <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+                                    <label> Choose Your OS : </label>
+                                    <div class="btn-group" data-toggle="buttons">
+                                        <label class="btn btn-secondary active" id="macwinbtn">
+                                            <input type="radio" name="MacWinEdit" value="mac" autocomplete="off" checked="">&nbsp;MAC
+                                        </label>
+                                        <label class="btn btn-secondary" id="macwinbtn">
+                                            <input type="radio" name="MacWinEdit" value="windows" autocomplete="off">&nbsp;Windows
+                                        </label>
+                                    </div>
+                                </div>
+                                <!-- browser selection -->
+                                <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+                                    <label> Choose Your Browser : </label>
+                                    <div class="btn-group" data-toggle="buttons">
+                                        <label class="btn btn-secondary active" id="browserbtn">
+                                            <input type="radio" name="browserEdit" value="chrome" autocomplete="off" checked="">&nbsp;Chrome
+                                        </label>
+                                        <label class="btn btn-secondary" id="browserbtn">
+                                            <input type="radio" name="browserEdit" value="firefox" autocomplete="off">&nbsp;Fire Fox
+                                        </label>
+                                        <label class="btn btn-secondary" id="browserbtn">
+                                            <input type="radio" name="browserEdit" value="opera" autocomplete="off">&nbsp;Opera
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                    <label> LOGIN CREDENTIALS </label>
+                                </div>
+                                <!-- login Username -->
+                                <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+                                    <input type="text" name="usernameEdit" class="form-control" placeholder="Username">
+                                </div>
+                                <!-- login Password -->
+                                <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
+                                    <input type="password" name="passwordEdit" class="form-control" placeholder="Password">
+                                </div>
+                                <!-- separator -->
+                                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                    <hr />
+                                </div>
+                                <!-- Buttons for save -->
+                                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                    <button type="submit" class="btn btn-light">Update Credentials</button>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            </form>
+        </div>
+        <script src="../static/js/popper.js"></script>
+        <script src="../static/js/bootstrap.min.js"></script>
+        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+        <script src="../static/js/ie10-viewport-bug-workaround.js"></script>
+        <script src="../static/js/index.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+            // get data from mongo
+                var _data;
+                req = $.ajax({
+                    url: '/getuser',
+                    type: 'GET',
+                });
+                req.done(function (data) {
+                    _data = $.parseJSON(data);
+                });
+
+
+            // hide and show new edit
+                var n = $("div[id='new']");
+                var e = $("div[id='edit']");
+                n.show();
+                e.hide();
+
+                $("label[id='userprofile']").click(function () {
+                    var link = $(this).children().first().val();
+                    if (link == "new"){
+                        n.show();
+                        e.hide();
+                    } else if (link == "edit"){
+                        n.hide();
+                        e.show();
+                    }
+                });
+            });
+            // check from
+                function checkTextField(form) {
+                    var username = form.username.value;
+                    var password = form.password.value;
+                        if (username == '' || password == '') {
+                            return false
+                        }
+                    return true;
+                }
+        </script>
+    </body>
+</html>

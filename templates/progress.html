@@ -16,13 +16,38 @@
         <div class="container">
             <div class="row" style="justify-content: center;">
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-center">
-                    <h1>Progress</h1>
+                    <h6>Progress</h6>
                 </div>
                 <div class="w-100 col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
                     <hr />
                 </div>
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-center">
-                    <h1>{{ _progress }}</h1>
+                    <h6>{{ _task }}</h6>
+                </div>
+                <!-- Post -->
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-center">
+                    {% for p in _post %}
+                        <div>
+                            <input type="checkbox" class="form-check-input" id="postcheck" disabled>
+                            <label class="form-check-label" for="postcheck">{{ p }}</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" class="form-check-input" id="likers" disabled>
+                            <label class="form-check-label" for="likers">Likers</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" class="form-check-input" id="commenters" disabled>
+                            <label class="form-check-label" for="commenters">Commenters</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" class="form-check-input" id="likings" disabled>
+                            <label class="form-check-label" for="likings">Their Profile Likes</label>
+                        </div>
+                        <div class="w-100 col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                            <hr />
+                        </div>
+                    {% endfor %}
+
                 </div>
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-center">
                     <button type="button" class="btn btn-light" onclick="window.location.href='{{ url_for('index') }}';">Stop Scrapping</button>
@@ -32,10 +57,15 @@
         <!-- Bootstrap core JavaScript
     ================================================== -->
         <!-- Placed at the end of the document so the pages load faster -->
+        <script src="../static/js/nanobar.min.js"></script>
         <script src="../static/js/jquery.min.js"></script>
         <script src="../static/js/popper.js"></script>
         <script src="../static/js/bootstrap.min.js"></script>
         <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
         <script src="../static/js/ie10-viewport-bug-workaround.js"></script>
+        <script type="text/javascript">
+            // continous call to task status
+
+        </script>
     </body>
 </html>

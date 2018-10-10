@@ -7,7 +7,7 @@ import csv
 
 __all__ = [
     'readCSV',
-    'downloadCSV',
+    'writeCSV',
 ]
 
 def readCSV(_filename, _columnName):
@@ -18,17 +18,25 @@ def readCSV(_filename, _columnName):
     :return: a list
     """
     _list = []
-    with open(_filename, 'rb') as csvFile:
+    with open(_filename, 'r') as csvFile:
         r = csv.DictReader(csvFile)
         for row in r:
             _list.append(row[_columnName])
     return _list
 
-def downloadCSV():
+def writeCSV(_filename, _dict_list, _dict_tuple, _dict_tuple_with_header, _path):
     """
-    functions to download csv file from database
-    :return:
+        Function for creating a csv file with the provided dictionary list
+        :param filename:
+        :param _dict_list: list of dictionary
+        :param _dict_tuple: tuple of dictionary
+        :param _dict_tuple_with_header: tuple of dictionary with named keys
+        :return:
     """
-    #TODO: query the data and write to a file
-    #TODO: save the file to desktop with time
-    pass
+    final_out_file = _path + "\\" + filename
+    with open(final_out_file, 'w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = list(_dict_tuple)[0]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in _dict_tuple_with_header:
+            writer.writerow(dict(zip(fieldnames, row)))
