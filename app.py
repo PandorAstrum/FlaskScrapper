@@ -66,6 +66,14 @@ def progress():
                 DRIVER = get_driver("windows", "firefox")
             elif (request.form.get("browser") == "opera"):
                 DRIVER = get_driver("windows", "opera")
+        
+        elif (request.form.get("MacWin") == "linux"):
+            if (request.form.get("browser") == "chrome"):
+                DRIVER = get_driver("linux", "chrome")
+            elif (request.form.get("browser") == "firefox"):
+                DRIVER = get_driver("linux", "firefox")
+            elif (request.form.get("browser") == "opera"):
+                DRIVER = get_driver("linux", "opera")
 
         _username = request.form.get("username")
         _password = request.form.get("password")
