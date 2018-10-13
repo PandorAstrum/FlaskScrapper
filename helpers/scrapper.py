@@ -47,6 +47,13 @@ def get_driver(_os, _browser):
             return webdriver.Firefox(executable_path="./Binary/windows/geckodriver.exe")
         if _browser == "opera":
             return webdriver.Opera(executable_path="./Binary/windows/operadriver.exe")
+    elif _os == "linux":
+        if _browser == "chrome":
+            return webdriver.Chrome(executable_path="/usr/lib/chromium-browser/chromedriver")
+        elif _browser == "firefox":
+            return webdriver.Firefox(executable_path="./Binary/linux/geckodriver")
+        if _browser == "opera":
+            return webdriver.Opera(executable_path="./Binary/linux/operadriver")
 
 def close(_driver):
     """
@@ -110,7 +117,8 @@ def login(_driver, _username, _password):
     time.sleep(1.0)                                         # wait for the page to load
     username = _driver.find_element_by_id("m_login_email")  # find the username input
     username.send_keys(_username)                           # pass the username
-    password = _driver.find_element_by_id("m_login_password")# find the password input
+    password = _driver.find_element_by_name("pass")
+    # password = _driver.find_element_by_id("m_login_password")# find the password input
     password.send_keys(_password)                           # pass the password
     password.send_keys(Keys.RETURN)                         # simulate enter / return key of keyboard
     time.sleep(2.0)                                         # wait for the next page to load

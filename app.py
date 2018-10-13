@@ -98,6 +98,49 @@ def progress():
     Progress page <all crawling mechanism starts here>
     :return:
     """
+<<<<<<< HEAD
+    global SCRAPE_COMPLETE
+    global SCRAPPING_INPROGRESS
+    if not SCRAPPING_INPROGRESS:
+        SCRAPPING_INPROGRESS = True
+        # global LIKERS_NAME
+        # start the crawler and execute a callback when complete
+        # eventual = crawl_runner.crawl(FacebookSpider(base_url=["https://www.facebook.com/5min.crafts/videos/286999302029750/"]))
+        # eventual.addCallback(finished_scrape)
+
+        # SETUP the Correct driver
+
+        if (request.form.get("MacWin") == "mac"):
+            if (request.form.get("browser") == "chrome"):
+                DRIVER = get_driver("mac", "chrome")
+            elif (request.form.get("browser") == "firefox"):
+                DRIVER = get_driver("mac", "firefox")
+            elif (request.form.get("browser") == "opera"):
+                DRIVER = get_driver("mac", "opera")
+
+        elif (request.form.get("MacWin") == "windows"):
+            if (request.form.get("browser") == "chrome"):
+                DRIVER = get_driver("windows", "chrome")
+            elif (request.form.get("browser") == "firefox"):
+                DRIVER = get_driver("windows", "firefox")
+            elif (request.form.get("browser") == "opera"):
+                DRIVER = get_driver("windows", "opera")
+        
+        elif (request.form.get("MacWin") == "linux"):
+            if (request.form.get("browser") == "chrome"):
+                DRIVER = get_driver("linux", "chrome")
+            elif (request.form.get("browser") == "firefox"):
+                DRIVER = get_driver("linux", "firefox")
+            elif (request.form.get("browser") == "opera"):
+                DRIVER = get_driver("linux", "opera")
+
+        _username = request.form.get("username")
+        _password = request.form.get("password")
+        # try login to facebook using request
+
+        login(DRIVER, _username, _password)
+
+=======
     _jobs_collections = mongo.db.jobs                   # get the jobs collections from mongo db
     _users_collections = mongo.db.users                 # get the users collections from mongo db
 
@@ -108,6 +151,7 @@ def progress():
     if _get_user != None:                               # error checking when document not found
         DRIVER = setup_drivers(_get_user["os"], _get_user["browser"])  # Setup the correct driver
         login(DRIVER, _get_user["user"], _get_user["pass"])  # try login to facebook
+>>>>>>> 9cc9ff1b9d425989593b72880270156d2bc86442
         if DRIVER.current_url == "https://m.facebook.com/login/save-device/?login_source=login#_=_":  # login success
             for i in _link_to_scrap:
                 DRIVER.get(i)                           # get the scrapping page
