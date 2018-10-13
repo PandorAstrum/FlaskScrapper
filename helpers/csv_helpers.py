@@ -33,7 +33,7 @@ def writeCSV(_filename, _dict_list, _dict_tuple, _dict_tuple_with_header, _path)
         :param _dict_tuple_with_header: tuple of dictionary with named keys
         :return:
     """
-    final_out_file = _path + "\\" + filename
+    final_out_file = _path + "\\" + _filename
     with open(final_out_file, 'w', newline='', encoding='utf-8') as csvfile:
         fieldnames = list(_dict_tuple)[0]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)

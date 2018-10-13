@@ -11,33 +11,15 @@ from werkzeug.routing import BaseConverter
 __all__ = [
     "get_curr_date_time",
     "get_outputFile",
+    "allowed_file",
     "ListConverter",
     "JSONEncoder",
-    "SCRAPPING_LIKERS",
-    "SCRAPPING_COMMENTERS",
-    "SCRAPPING_LIKERS_LIKE",
-    "SCRAPPING_COMMENTERS_LIKE",
     "SCRAPE_COMPLETE",
-    "LIKERS_NAME",
-    "LIKERS_PROFILE",
-    "LIKERS_LIKE",
-    "COMMENTERS_NAME",
-    "COMMENTERS_PROFILE",
-    "COMMENTERS_LIKE"
 ]
 
 SCRAPPING_INPROGRESS = False            # flag for if scrapping started or not
-SCRAPPING_LIKERS = False                # flag for if likers scrapping done or not
-SCRAPPING_COMMENTERS = False            # flag for if commenters scrapping done or not
-SCRAPPING_LIKERS_LIKE = False           # flag for if likers like scrapping done or not
-SCRAPPING_COMMENTERS_LIKE = False       # flag for if commenters like scrapping done or not
 SCRAPE_COMPLETE = False                 # flag for if entire scrapping done or not
-LIKERS_NAME = []
-LIKERS_PROFILE = []
-LIKERS_LIKE = []
-COMMENTERS_NAME = []
-COMMENTERS_PROFILE = []
-COMMENTERS_LIKE = []
+ALLOWED_EXTENSIONS = set(['csv'])
 
 def get_curr_date_time(_strft="%Y_%b_%d_%H.%M.%S"):
     """
@@ -55,33 +37,27 @@ def get_outputFile(_extension="csv"):
     """
     return f"{get_curr_date_time()}.{_extension}"
 
-TEST_JSON_DUMPS = { "job1":
-    {
-        "id": 1,
-        "postLink": "https://facebook.com",
-        "Likers":{
-            "Name":[],
-            "profileLink":[],
-            "like":[]
-        },
-        "Commenters": {
-            "Name":[],
-            "profileLink":[],
-            "like":[]
-        },
-        "dateStamp": "22/03/2018"
-    }
-}
+def allowed_file(_filename):
+    """
+    functions to set allowed file in upload
+    :param _filename: string filename
+    :return: string of allowed file name
+    """
+    return '.' in _filename and _filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 class JSONEncoder(json.JSONEncoder):
+    """
+    helps to encode mongo nested collections to json
+    """
     def default(self, o):
         if isinstance(o, ObjectId):
             return str(o)
         return json.JSONEncoder.default(self, o)
 
-
 class ListConverter(BaseConverter):
-
+    """
+    custom list argument parser for route
+    """
     def to_python(self, value):
         return value.split('+')
 

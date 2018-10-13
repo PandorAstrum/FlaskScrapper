@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 __author__ = "Ashiquzzaman Khan"
-__desc__ = "Main Exe file to Run"
+__desc__ = "scraper helper file"
 """
-
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
-from selenium.webdriver.common.keys import Keys
 import time
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-
 from bs4 import BeautifulSoup
-# DRIVER = webdriver.PhantomJS(executable_path="./Binary/phantomjs.exe")
 from selenium.webdriver.support.wait import WebDriverWait
 
 __all__ = [
@@ -49,7 +46,7 @@ def get_driver(_os, _browser):
             return webdriver.Opera(executable_path="./Binary/windows/operadriver.exe")
     elif _os == "linux":
         if _browser == "chrome":
-            return webdriver.Chrome(executable_path="/usr/lib/chromium-browser/chromedriver")
+            return webdriver.Chrome(executable_path="./Binary/linux/chromedriver")
         elif _browser == "firefox":
             return webdriver.Firefox(executable_path="./Binary/linux/geckodriver")
         if _browser == "opera":
@@ -129,19 +126,19 @@ def get_likers(_driver):
     :param _driver: web driver object
     :return: two list
     """
-    _likers_name_list = []                  # the first list of names that will be returned
-    _likers_profile_list = []               # the second list of profile links that will be returned
-    _driver.find_element_by_class_name("_1g06").click() # click on the all likes button
-    time.sleep(2.0)                         # wait for the pages to load
-    more = more_locator(_driver)            # find the see more button
+    _likers_name_list = []                                      # the first list of names that will be returned
+    _likers_profile_list = []                                   # the second list of profile links that will be returned
+    _driver.find_element_by_class_name("_1g06").click()         # click on the all likes button
+    time.sleep(2.0)                                             # wait for the pages to load
+    more = more_locator(_driver)                                # find the see more button
     while more != None:
-        more.click()                        # click on more buttons
-        time.sleep(2.0)                     # wait to load more
-        more = more_locator(_driver)        # find again the more button
+        more.click()                                            # click on more buttons
+        time.sleep(2.0)                                         # wait to load more
+        more = more_locator(_driver)                            # find again the more button
 
-    html_doc = _driver.page_source          # dumping the page for scrapping data
-    soup = BeautifulSoup(html_doc, 'lxml')  # making soup for navigating through HTML
-    block = soup.findAll("div", {'class': '_4mn'})  # isolate all likers name and profile_link div
+    html_doc = _driver.page_source                              # dumping the page for scrapping data
+    soup = BeautifulSoup(html_doc, 'lxml')                      # making soup for navigating through HTML
+    block = soup.findAll("div", {'class': '_4mn'})              # isolate all likers name and profile_link div
 
     for b in block:
         profile_link = b.find("a")['href']                      # finding the profile link
@@ -150,38 +147,42 @@ def get_likers(_driver):
 
         name = b.find("strong").text                            # finding the name
         if "." in name:
-            name = name.replace(".", "")
+            name = name.replace(".", "")                        # replace any dot in names because mongo doesn't allow dot
         _likers_name_list.append(name)                          # adding the name to the list
 
     return _likers_name_list, _likers_profile_list              # return the two list
 
 def get_commenters(_driver):
-    _commenters_name_list = []                  # the first list of names that will be returned
-    _commenters_profile_list = []               # the second list of profile links that will be returned
+    """
+    functions to get commenters
+    :param _driver: webd river object
+    :return: two list
+    """
+    _commenters_name_list = []                                      # the first list of names that will be returned
+    _commenters_profile_list = []                                   # the second list of profile links that will be returned
 
-    view_previous_button = get_view_previous_locator(_driver)
+    view_previous_button = get_view_previous_locator(_driver)       # get previous button
 
     while view_previous_button != None:
-        view_previous_button.find_element_by_xpath("..").click()
-        time.sleep(1.0)
-        view_previous_button = get_view_previous_locator(_driver)
+        view_previous_button.find_element_by_xpath("..").click()    # previous button click
+        time.sleep(1.0)                                             # wait for page to load
+        view_previous_button = get_view_previous_locator(_driver)   # get previous button again
 
-    html_doc = _driver.page_source
-    soup3 = BeautifulSoup(html_doc, 'lxml')
+    html_doc = _driver.page_source                                  # dump the html of pages
+    soup3 = BeautifulSoup(html_doc, 'lxml')                         # make beautiful soup
 
-    all_blocks = soup3.findAll('div', {'class':'_2b05'})
+    all_blocks = soup3.findAll('div', {'class':'_2b05'})            # get the blocks that holds data
     for blocks in all_blocks:
-        profile_link = blocks.find("a")['href']
-        # absolute link
-        absolute_profile_link = LOGIN_URL + profile_link
-        _commenters_profile_list.append(absolute_profile_link)
+        profile_link = blocks.find("a")['href']                     # get profile links of the commenters
+        absolute_profile_link = LOGIN_URL + profile_link            # make the links absolute
+        _commenters_profile_list.append(absolute_profile_link)      # append to list
 
-        name = blocks.find("a").text
+        name = blocks.find("a").text                                # get the name of the commenters
         if "." in name:
-            name = name.replace(".", "")
-        _commenters_name_list.append(name)
+            name = name.replace(".", "")                            # replace any dot in names because mongo doesnt allow dot
+        _commenters_name_list.append(name)                          # append to the list
 
-    return _commenters_name_list, _commenters_profile_list
+    return _commenters_name_list, _commenters_profile_list          # return the two list
 
 def get_profile_like(_driver, _list, _url_list):
     """
