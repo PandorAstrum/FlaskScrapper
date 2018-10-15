@@ -123,13 +123,16 @@ def progress():
     :return:
     """
     _idvalue = request.form.get('idvalue')          # get the id of the user
-    print(_idvalue)
+    _timeout = float(request.form.get('rangeslider'))# get the slider value for timeout
     _activeLink = request.form.get("postlink")      # get the active post selections single / multiple
     _scrap_link = get_post(_activeLink)             # actions perform based on post selections
 
-    _task = scrapping_task.apply_async(args=[_idvalue, _scrap_link]) # start celery task in another thread
+    if _idvalue != "None":
+        _task = scrapping_task.apply_async(args=[_idvalue, _timeout, _scrap_link]) # start celery task in another thread
 
-    return render_template('progress.html', _post=_scrap_link, _task=_task.id)
+        return render_template('progress.html', _post=_scrap_link, _task=_task.id)
+    else:
+        return render_template('error.html', _error="No User selected")
 
 
 @app.route('/error', methods=['GET'])
@@ -219,16 +222,20 @@ def get_post(_activePost):
 
 # celery tasks ======================================================
 @celery.task(bind=True)
-def scrapping_task(self, _idvalue, _scrapLink):
+def scrapping_task(self, _idvalue, _timeout,  _scrapLink):
+    _likes_profile_likes = {}
+    _comments_profile_likes = {}
+    _likers_like = []
+    _likers_like_url = []
+
     _jobs_collections = mongo.db.jobs  # get the jobs collections from mongo db
     _users_collections = mongo.db.users  # get the users collections from mongo db
     _id_list = []
     _get_user = _users_collections.find_one({"_id": ObjectId(_idvalue)})  # find matching documents from
-    print(_get_user["os"])
     _total = 100
     if _get_user != None:  # error checking when document not found
         DRIVER = get_driver(_get_user["os"], _get_user["browser"])  # Setup the correct driver
-        login(DRIVER, _get_user["user"], _get_user["pass"])  # try login to facebook
+        login(DRIVER, _timeout, _get_user["user"], _get_user["pass"])  # try login to facebook
         if DRIVER.current_url == "https://m.facebook.com/login/save-device/?login_source=login#_=_":  # login success
             self.update_state(state='Logging in..',
                               meta={'current': 5, 'total': _total,
@@ -239,36 +246,62 @@ def scrapping_task(self, _idvalue, _scrapLink):
                                   meta={'current': 10, 'total': _total,
                                         'status': 200})
 
-                _commenters_name, _commenters_profile = get_commenters(DRIVER)  # get Commenters
+                _commenters_names, _commenters_profiles = get_commenters(DRIVER, _timeout)  # get Commenters
 
                 self.update_state(state='Getting commenters',
                                   meta={'current': 15, 'total': _total,
                                         'status': 200})
-                _likers_name, _likers_profile = get_likers(DRIVER)  # get likers
+                _likers_names, _likers_profiles = get_likers(DRIVER, _timeout)  # get likers
 
-                self.update_state(state='Getting likers',
-                                  meta={'current': 20, 'total': _total,
-                                        'status': 200})
-                likers = get_profile_like(DRIVER, _likers_name, _likers_profile)  # get likers like
-                self.update_state(state='Getting Likers profile likes',
-                                  meta={'current': 50, 'total': _total,
-                                        'status': 200})
-                commenters = get_profile_like(DRIVER, _commenters_name, _commenters_profile)  # get commenters like
-                self.update_state(state='Getting commenters profile likes',
-                                  meta={'current': 80, 'total': _total,
-                                        'status': 200})
                 _data = {
-                    "Post": i,
-                    "Likers": likers,
-                    "Commenters": commenters,
+                    "Post": i.replace('https://m.', 'https://www.'),
+                    "Likers": _likes_profile_likes,
+                    "Commenters": _comments_profile_likes,
                     "DateStamp": str(get_curr_date_time(_strft="%b/%d/%Y %H\u002E%M"))
                 }
                 self.update_state(state='Inserting data into mongo',
                                   meta={'current': 95, 'total': _total,
                                         'status': 200})
                 id_ = _jobs_collections.insert_one(_data)
+                # for loop on likers profile
+                _likers_iterator = 0
+                for _liker_profile in _likers_profiles:
+                    current_like_name = _likers_names[_likers_iterator]
+                    get_profile_like(DRIVER, _timeout, _likes_profile_likes, current_like_name, _liker_profile)
+                    _jobs_collections.find_one_and_update({"_id": ObjectId(id_.inserted_id)},
+                                                          {"$set": {"Likers": _likes_profile_likes}})
+                    _likers_iterator += 1
+
+                _commenters_iterator = 0
+                for _commenter_profile in _commenters_profiles:
+                    current_comment_name = _commenters_names[_commenters_iterator]
+                    get_profile_like(DRIVER, _timeout, _comments_profile_likes, current_comment_name, _commenter_profile)
+                    _jobs_collections.find_one_and_update({"_id": ObjectId(id_.inserted_id)},
+                                                          {"$set": {"Likers": _comments_profile_likes}})
+                    _commenters_iterator += 1
 
                 _id_list.append(JSONEncoder().encode(id_.inserted_id))
+                # self.update_state(state='Getting likers',
+                #                   meta={'current': 20, 'total': _total,
+                #                         'status': 200})
+                # likers = get_profile_like(DRIVER, _timeout, _likers_name, _likers_profile)  # get likers like
+                # self.update_state(state='Getting Likers profile likes',
+                #                   meta={'current': 50, 'total': _total,
+                #                         'status': 200})
+                # commenters = get_profile_like(DRIVER, _timeout, _commenters_name, _commenters_profile)  # get commenters like
+                # self.update_state(state='Getting commenters profile likes',
+                #                   meta={'current': 80, 'total': _total,
+                #                         'status': 200})
+                # _data = {
+                #     "Post": i,
+                #     "Likers": likers,
+                #     "Commenters": commenters,
+                #     "DateStamp": str(get_curr_date_time(_strft="%b/%d/%Y %H\u002E%M"))
+                # }
+                # self.update_state(state='Inserting data into mongo',
+                #                   meta={'current': 95, 'total': _total,
+                #                         'status': 200})
+                # id_ = _jobs_collections.insert_one(_data)
 
             close(DRIVER)
     return {'current': 100, 'total': _total, 'status': 'Scrape Complete',
