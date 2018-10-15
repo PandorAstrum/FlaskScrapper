@@ -61,7 +61,8 @@
                     <div class="row">
                         <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
                             <label>OS: </label>
-                            <label id="os"></label>
+                            <label id="os" ></label>
+                            <input type="hidden" name="idvalue" value="">
                         </div>
                         <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
                             <label>Browser: </label>
@@ -69,7 +70,12 @@
                         </div>
                     </div>
                 </div>
-
+                <!-- Range for timeout-->
+                <div class="form-group">
+                    <label for="formControlRange">Timeout Settings</label>
+                    <input type="range" class="form-control-range" min="1" max="10" value="2" id="formControlRange" name="rangeslider">
+                    <p>Seconds : <span id="rangevalue"></span></p>
+                </div>
                 <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12" style="margin-top: 1%; margin-bottom: 1%;">
                     <div class="row" style="justify-content: center;">
 
@@ -178,13 +184,26 @@
                     for (let i = 0; i < _data.length; i++) {
                         if ($(this).val() == _data[i]["user"]){
                             $("label[id='os']").html(_data[i]["os"]);
+                            $("input[name='idvalue']").val(_data[i]["_id"]);
                             $("label[id='browser']").html(_data[i]["browser"]);
                         } else if ($(this).val() == "None"){
                             $("label[id='os']").html("Not Available");
+                            $("input[name='idvalue']").val("None");
                             $("label[id='browser']").html("Not Available");
                         }
                     }
                 });
+                // update the range slider value
+                var slider = document.getElementById("formControlRange");
+                var output = document.getElementById("rangevalue");
+                output.innerHTML = slider.value;
+
+                slider.oninput = function() {
+                    output.innerHTML = this.value;
+                };
+                {#$("#formControlRange").oninput(function() {#}
+                {#    $("label[id='rangevalue']").html(this.val());#}
+                {#});#}
             // hide and show post link
                 var ps1 = $("div[id='postLink1']");
                 var ps2 = $("div[id='postLink2']");

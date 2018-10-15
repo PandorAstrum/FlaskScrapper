@@ -38,50 +38,84 @@
                             </div>
                             <h6>Comments</h6>
                             <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Commenters</th>
-                                    <th>Their Likings</th>
-                                    <th> URL Links</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Commenters Name</th>
+                                        <th>Profile Details<br></th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
                                 {% for key, val in _job["Commenters"].items() %}
-                                <tr>
-                                    <th scope="row">{{ loop.index }}</th>
-                                    <td>{{ key }}</td>
-                                    <td>{{ val.keys() }}</td>
-                                    <td>{{ val.values() }}</td>
-                                </tr>
+                                    <tr>
+                                        <th scope="row">{{ loop.index }}</th>
+                                        <td>{{ key }}</td>
+
+                                        <td><table >
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Likes</th>
+                                                    <th>URL</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for i in val.keys() %}
+                                                <tr>
+                                                    <th scope="row">{{ loop.index }}</th>
+                                                    <td>{{ i }}</td>
+                                                    <td>{{ val[i] }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table></td>
+                                    </tr>
                                 {% endfor %}
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
                             <!-- Separator -->
                             <div class="w-100 col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
                             <hr />
                         </div>
                             <h6>Likes</h6>
                             <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Likers</th>
-                                    <th>Their Likings</th>
-                                    <th>URL Link</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for key, val in _job["Likers"].items() %}
-                                <tr>
-                                    <th scope="row">{{ loop.index }}</th>
-                                    <td>{{ key }}</td>
-                                    <td>{{ val.keys() }}</td>
-                                    <td>{{ val.values() }}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Likers Name</th>
+                                        <th>Profile Details<br></th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                {% for key, val in _job["Likers"].items() %}
+                                    <tr>
+                                        <th scope="row">{{ loop.index }}</th>
+                                        <td>{{ key }}</td>
+
+                                        <td><table >
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Likes</th>
+                                                    <th>URL</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for i in val.keys() %}
+                                                <tr>
+                                                    <th scope="row">{{ loop.index }}</th>
+                                                    <td>{{ i }}</td>
+                                                    <td>{{ val[i] }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
                         {% endfor %}
                     {% endif %}
                 </div>
