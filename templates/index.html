@@ -53,7 +53,8 @@
                     <div class="row">
                         <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
                             <label>OS : </label>
-                            <label id="os"></label>
+                            <label id="os" ></label>
+                            <input type="hidden" name="idvalue" value="">
                         </div>
                         <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
                             <label>Browser : </label>
@@ -165,6 +166,7 @@
                     for (let i = 0; i < _data.length; i++) {
                         if ($(this).val() == _data[i]["user"]){
                             $("label[id='os']").html(_data[i]["os"]);
+                            $("input[name='idvalue']").val(_data[i]["_id"]);
                             $("label[id='browser']").html(_data[i]["browser"]);
                         } else if ($(this).val() == "None"){
                             $("label[id='os']").html("Not Available");

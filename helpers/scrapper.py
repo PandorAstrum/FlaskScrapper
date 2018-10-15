@@ -3,6 +3,7 @@
 __author__ = "Ashiquzzaman Khan"
 __desc__ = "scraper helper file"
 """
+
 import time
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -52,6 +53,7 @@ def get_driver(_os, _browser):
         if _browser == "opera":
             return webdriver.Opera(executable_path="./Binary/linux/operadriver")
 
+
 def close(_driver):
     """
     functions for closing the web driver
@@ -59,6 +61,7 @@ def close(_driver):
     :return:
     """
     _driver.close()             # closing the driver
+
 
 def more_locator(_driver):
     """
@@ -71,6 +74,7 @@ def more_locator(_driver):
     except NoSuchElementException:
         return None
 
+
 def get_view_previous_locator(_driver):
     """
     functions for locating view previous comments button
@@ -81,6 +85,7 @@ def get_view_previous_locator(_driver):
         return _driver.find_element_by_xpath("[//*contains(text(), 'View previous comments…')]") # click on the all likes button
     except NoSuchElementException:
         return None
+
 
 def fast_scroll(_driver, _element="document.body"):
     """
@@ -102,6 +107,7 @@ def fast_scroll(_driver, _element="document.body"):
         last_height = new_height
     time.sleep(1.0)
 
+
 def login(_driver, _username, _password):
     """
     functions for login to facebook
@@ -119,6 +125,7 @@ def login(_driver, _username, _password):
     password.send_keys(_password)                           # pass the password
     password.send_keys(Keys.RETURN)                         # simulate enter / return key of keyboard
     time.sleep(2.0)                                         # wait for the next page to load
+
 
 def get_likers(_driver):
     """
@@ -152,6 +159,7 @@ def get_likers(_driver):
 
     return _likers_name_list, _likers_profile_list              # return the two list
 
+
 def get_commenters(_driver):
     """
     functions to get commenters
@@ -183,6 +191,7 @@ def get_commenters(_driver):
         _commenters_name_list.append(name)                          # append to the list
 
     return _commenters_name_list, _commenters_profile_list          # return the two list
+
 
 def get_profile_like(_driver, _list, _url_list):
     """

@@ -70,7 +70,7 @@ def userprofile():
     :return:
     """
     _users_collections = mongo.db.users
-    _all_users_document = list(_users_collections.find())  # get all the documents from user collections
+    _all_users_document = list(_users_collections.find())           # get all the documents from user collections
     return render_template('user.html', _user_data=_all_users_document)
 
 
@@ -122,11 +122,12 @@ def progress():
     Progress page <all crawling mechanism starts here>
     :return:
     """
-    _selections = request.form.get('selections')    # get the selections from dropdown
+    _idvalue = request.form.get('idvalue')          # get the id of the user
+    print(_idvalue)
     _activeLink = request.form.get("postlink")      # get the active post selections single / multiple
     _scrap_link = get_post(_activeLink)             # actions perform based on post selections
 
-    _task = scrapping_task.apply_async(args=[_selections, _scrap_link]) # start celery task in another thread
+    _task = scrapping_task.apply_async(args=[_idvalue, _scrap_link]) # start celery task in another thread
 
     return render_template('progress.html', _post=_scrap_link, _task=_task.id)
 
@@ -194,37 +195,6 @@ def downloadCSV():
 
 
 # custom methods ============================================================
-def setup_drivers(_os, _browser):
-    """
-    functions for setup the correct drivers
-    :param _os: string name of os
-    :param _browser: string name of browsers
-    :return: driver object
-    """
-
-
-    if (_os == "mac"):
-        if (_browser == "chrome"):
-            return get_driver("mac", "chrome")
-        elif (_browser == "firefox"):
-            return get_driver("mac", "firefox")
-        elif (_browser == "opera"):
-            return get_driver("mac", "opera")
-    elif (_os == "windows"):
-        if (_browser == "chrome"):
-            return get_driver("windows", "chrome")
-        elif (_browser == "firefox"):
-            return get_driver("windows", "firefox")
-        elif (_browser == "opera"):
-            return get_driver("windows", "opera")
-    elif (_os == "linux"):
-        if (_browser == "chrome"):
-            return get_driver("linux", "chrome")
-        elif (_browser == "firefox"):
-            return get_driver("linux", "firefox")
-        elif (_browser == "opera"):
-            return get_driver("linux", "opera")
-
 
 def get_post(_activePost):
     """
@@ -249,14 +219,15 @@ def get_post(_activePost):
 
 # celery tasks ======================================================
 @celery.task(bind=True)
-def scrapping_task(self, _user, _scrapLink):
+def scrapping_task(self, _idvalue, _scrapLink):
     _jobs_collections = mongo.db.jobs  # get the jobs collections from mongo db
     _users_collections = mongo.db.users  # get the users collections from mongo db
     _id_list = []
-    _get_user = _users_collections.find_one({"user": _user})  # find matching documents from mongo
+    _get_user = _users_collections.find_one({"_id": ObjectId(_idvalue)})  # find matching documents from
+    print(_get_user["os"])
     _total = 100
     if _get_user != None:  # error checking when document not found
-        DRIVER = setup_drivers(_get_user["os"], _get_user["browser"])  # Setup the correct driver
+        DRIVER = get_driver(_get_user["os"], _get_user["browser"])  # Setup the correct driver
         login(DRIVER, _get_user["user"], _get_user["pass"])  # try login to facebook
         if DRIVER.current_url == "https://m.facebook.com/login/save-device/?login_source=login#_=_":  # login success
             self.update_state(state='Logging in..',
