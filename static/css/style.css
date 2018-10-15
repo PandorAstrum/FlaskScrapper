@@ -1,0 +1,14 @@
+.page-heading {
+    margin-top: 20px;
+}
+
+.table thead th {
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+/* .light-hr {
+    border-top: 1px solid white !important;
+    margin-top: 2em !important;
+    margin-bottom: 2em !important;
+
+} */
