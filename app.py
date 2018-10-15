@@ -201,20 +201,29 @@ def setup_drivers(_os, _browser):
     :param _browser: string name of browsers
     :return: driver object
     """
-    def setup_browser(_browser):
+
+
+    if (_os == "mac"):
         if (_browser == "chrome"):
             return get_driver("mac", "chrome")
         elif (_browser == "firefox"):
             return get_driver("mac", "firefox")
         elif (_browser == "opera"):
             return get_driver("mac", "opera")
-
-    if (_os == "mac"):
-        setup_browser(_browser)
     elif (_os == "windows"):
-        setup_browser(_browser)
+        if (_browser == "chrome"):
+            return get_driver("windows", "chrome")
+        elif (_browser == "firefox"):
+            return get_driver("windows", "firefox")
+        elif (_browser == "opera"):
+            return get_driver("windows", "opera")
     elif (_os == "linux"):
-        setup_browser(_browser)
+        if (_browser == "chrome"):
+            return get_driver("linux", "chrome")
+        elif (_browser == "firefox"):
+            return get_driver("linux", "firefox")
+        elif (_browser == "opera"):
+            return get_driver("linux", "opera")
 
 
 def get_post(_activePost):
