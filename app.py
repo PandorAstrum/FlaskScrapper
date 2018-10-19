@@ -18,7 +18,7 @@ app.config.from_pyfile('config.cfg')                        # Using the config f
 mongo = PyMongo(app)                                        # Pymongo Connections
 celery = Celery(app.name,
                 broker=app.config['CELERY_BROKER_URL'],
-                backend=app.config['CELERY_RESULT_BACKEND'])  # celery connections
+                backend=app.config['CELERY_RESULT_BACKEND'], include=['scrapping_task'])  # celery connections
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -263,6 +263,7 @@ def scrapping_task(self, _idvalue, _timeout,  _scrapLink):
                                   meta={'current': 95, 'total': _total,
                                         'status': 200})
                 id_ = _jobs_collections.insert_one(_data)
+
                 # for loop on likers profile
                 _likers_iterator = 0
                 for _liker_profile in _likers_profiles:
@@ -284,24 +285,7 @@ def scrapping_task(self, _idvalue, _timeout,  _scrapLink):
                 # self.update_state(state='Getting likers',
                 #                   meta={'current': 20, 'total': _total,
                 #                         'status': 200})
-                # likers = get_profile_like(DRIVER, _timeout, _likers_name, _likers_profile)  # get likers like
-                # self.update_state(state='Getting Likers profile likes',
-                #                   meta={'current': 50, 'total': _total,
-                #                         'status': 200})
-                # commenters = get_profile_like(DRIVER, _timeout, _commenters_name, _commenters_profile)  # get commenters like
-                # self.update_state(state='Getting commenters profile likes',
-                #                   meta={'current': 80, 'total': _total,
-                #                         'status': 200})
-                # _data = {
-                #     "Post": i,
-                #     "Likers": likers,
-                #     "Commenters": commenters,
-                #     "DateStamp": str(get_curr_date_time(_strft="%b/%d/%Y %H\u002E%M"))
-                # }
-                # self.update_state(state='Inserting data into mongo',
-                #                   meta={'current': 95, 'total': _total,
-                #                         'status': 200})
-                # id_ = _jobs_collections.insert_one(_data)
+
 
             close(DRIVER)
     return {'current': 100, 'total': _total, 'status': 'Scrape Complete',

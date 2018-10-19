@@ -12,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 from selenium.webdriver.support.wait import WebDriverWait
+from helpers.generic_helpers import EXCEPTION_KEYWORD
 
 __all__ = [
     'login',
@@ -153,8 +154,10 @@ def get_likers(_driver, _timeout):
         _likers_profile_list.append(full_profile_link)          # adding the URL to the list
 
         name = b.find("strong").text                            # finding the name
-        if "." in name:
-            name = name.replace(".", "")                        # replace any dot in names because mongo doesn't allow dot
+        for i in EXCEPTION_KEYWORD:
+            if i in name:
+                name = name.replace(i, "")                      # replace any dot in names because mongo doesn't allow dot
+
         _likers_name_list.append(name)                          # adding the name to the list
 
     return _likers_name_list, _likers_profile_list              # return the two list
@@ -186,8 +189,10 @@ def get_commenters(_driver, _timeout):
         _commenters_profile_list.append(absolute_profile_link)      # append to list
 
         name = blocks.find("a").text                                # get the name of the commenters
-        if "." in name:
-            name = name.replace(".", "")                            # replace any dot in names because mongo doesnt allow dot
+        for i in EXCEPTION_KEYWORD:
+            if i in name:
+                name = name.replace(i, "")                          # replace any dot in names because mongo doesnt allow dot
+
         _commenters_name_list.append(name)                          # append to the list
 
     return _commenters_name_list, _commenters_profile_list          # return the two list
@@ -239,8 +244,11 @@ def get_profile_like(_driver, _timeout, _likes_dict, _current_name, _url):
 
             for j in b:
                 _liked_item_text = j.find('div', {'class': '_1a5r'}).find('span').text  # get the text
-                if "." in _liked_item_text:
-                    _liked_item_text = _liked_item_text.replace(".", "")
+
+                for k in EXCEPTION_KEYWORD:
+                    if k in _liked_item_text:
+                        _liked_item_text = _liked_item_text.replace(k, "")
+
                 _link = j.find('a')['href']
                 _link_processed = "https://www.facebook.com" + _link
                 _profile_likes_link[_liked_item_text] = _link_processed

@@ -15,11 +15,13 @@ __all__ = [
     "ListConverter",
     "JSONEncoder",
     "SCRAPE_COMPLETE",
+    "EXCEPTION_KEYWORD"
 ]
 
 SCRAPPING_INPROGRESS = False            # flag for if scrapping started or not
 SCRAPE_COMPLETE = False                 # flag for if entire scrapping done or not
-ALLOWED_EXTENSIONS = set(['csv'])
+ALLOWED_EXTENSIONS = set(['csv'])       # only allow csv file to upload
+EXCEPTION_KEYWORD = [".", "$"]
 
 def get_curr_date_time(_strft="%Y_%b_%d_%H.%M.%S"):
     """
