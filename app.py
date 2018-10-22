@@ -1,11 +1,16 @@
+import collections
+import csv
 import os
+import pandas
+import subprocess
+
 from bson import ObjectId
 from celery import Celery
-from flask import Flask, render_template, request, redirect, url_for, jsonify, json
+from flask import Flask, render_template, request, jsonify
 from flask_pymongo import PyMongo
 from werkzeug.utils import secure_filename
 from helpers.scrapper import login, get_driver, get_likers, get_profile_like, close, get_commenters
-from helpers.generic_helpers import SCRAPE_COMPLETE,SCRAPPING_INPROGRESS, get_curr_date_time, JSONEncoder, allowed_file
+from helpers.generic_helpers import get_curr_date_time, JSONEncoder, allowed_file
 from helpers.csv_helpers import readCSV
 from helpers.generic_helpers import ListConverter
 
@@ -18,7 +23,7 @@ app.config.from_pyfile('config.cfg')                        # Using the config f
 mongo = PyMongo(app)                                        # Pymongo Connections
 celery = Celery(app.name,
                 broker=app.config['CELERY_BROKER_URL'],
-                backend=app.config['CELERY_RESULT_BACKEND'], include=['scrapping_task'])  # celery connections
+                backend=app.config['CELERY_RESULT_BACKEND'])  # celery connections
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -122,13 +127,16 @@ def progress():
     Progress page <all crawling mechanism starts here>
     :return:
     """
+    celery.control.purge()
     _idvalue = request.form.get('idvalue')          # get the id of the user
-    _timeout = float(request.form.get('rangeslider'))# get the slider value for timeout
+    _timeout = float(request.form.get('rangeslider'))  # get the slider value for timeout
     _activeLink = request.form.get("postlink")      # get the active post selections single / multiple
     _scrap_link = get_post(_activeLink)             # actions perform based on post selections
 
     if _idvalue != "None":
-        _task = scrapping_task.apply_async(args=[_idvalue, _timeout, _scrap_link]) # start celery task in another thread
+        _task = scrapping_task.apply_async(args=[_idvalue,
+                                                 _timeout,
+                                                 _scrap_link])  # start celery task in another thread
 
         return render_template('progress.html', _post=_scrap_link, _task=_task.id)
     else:
@@ -157,47 +165,39 @@ def results(_jobs_id_list):
 
         _job_document = _jobs_collections.find_one({"_id": ObjectId(i)})
         _jobs_list.append(_job_document)
-    # _jobs.find_one("Post")
-    # global SCRAPE_COMPLETE
-    # if SCRAPE_COMPLETE:
-    #     # render results
-    #     pass
-        # return json.dumps(quotes_list)
 
     return render_template('results.html', _list_of_jobs=_jobs_list)
 
 
 @app.route("/downloadCSV", methods=["POST"])
 def downloadCSV():
-    def flattenjson(b, delim):
-        val = {}
-        for i in b.keys():
-            if isinstance(b[i], dict):
-                get = flattenjson(b[i], delim)
-                for j in get.keys():
-                    val[i + delim + j] = get[j]
-            else:
-                val[i] = b[i]
-
-        return val
-
-
+    _jobs_collections = mongo.db.jobs                               # get the jobs collections from mongo db
     if request.method == "POST":
-        _data = request.json['data']
+        raw_post_id = request.get_json()                            # get json parsed from front end with ajax
+        post_id = raw_post_id.replace("Post ID ", "")               # replace the text to get only ID
+        _job = _jobs_collections.find_one({"_id": ObjectId(post_id)})  # search for specific job with id
 
-        real_data = flattenjson(_data, "__")
-        print(json.loads(_data))
-        print(real_data)
+        df = pandas.DataFrame(_job)
+        if '_id' in df:
+            del df['_id']
 
-        outfile = str(get_curr_date_time()) + ".csv"
-        # return Response(
-        #     csv,
-        #     mimetype="text/csv",
-        #     headers={"Content-disposition":
-        #          f"attachment; filename={outfile}"})
+        df.to_csv(f"{app.config['DOWNLOAD_FOLDER']}\\{get_curr_date_time()}.csv", index=False)
+
+    return jsonify("Success")
 
 
 # custom methods ============================================================
+def flatten(d, parent_key='', sep='_'):
+
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, collections.MutableMapping):
+            items.extend(flatten(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
 
 def get_post(_activePost):
     """
@@ -205,11 +205,11 @@ def get_post(_activePost):
     :return: a list
     """
     _link = []
-    if (_activePost == "postLink1"):
+    if _activePost == "postLink1":
         _scrapping_link = request.form.get("singlePost")
         _processed_link = _scrapping_link.replace("www", "m")
         _link.append(_processed_link)
-    elif (_activePost == "postLink2"):
+    elif _activePost == "postLink2":
         file = request.files['csvfile']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -225,8 +225,6 @@ def get_post(_activePost):
 def scrapping_task(self, _idvalue, _timeout,  _scrapLink):
     _likes_profile_likes = {}
     _comments_profile_likes = {}
-    _likers_like = []
-    _likers_like_url = []
 
     _jobs_collections = mongo.db.jobs  # get the jobs collections from mongo db
     _users_collections = mongo.db.users  # get the users collections from mongo db
@@ -276,16 +274,16 @@ def scrapping_task(self, _idvalue, _timeout,  _scrapLink):
                 _commenters_iterator = 0
                 for _commenter_profile in _commenters_profiles:
                     current_comment_name = _commenters_names[_commenters_iterator]
-                    get_profile_like(DRIVER, _timeout, _comments_profile_likes, current_comment_name, _commenter_profile)
+                    get_profile_like(DRIVER,
+                                     _timeout,
+                                     _comments_profile_likes,
+                                     current_comment_name,
+                                     _commenter_profile)
                     _jobs_collections.find_one_and_update({"_id": ObjectId(id_.inserted_id)},
                                                           {"$set": {"Likers": _comments_profile_likes}})
                     _commenters_iterator += 1
 
                 _id_list.append(JSONEncoder().encode(id_.inserted_id))
-                # self.update_state(state='Getting likers',
-                #                   meta={'current': 20, 'total': _total,
-                #                         'status': 200})
-
 
             close(DRIVER)
     return {'current': 100, 'total': _total, 'status': 'Scrape Complete',

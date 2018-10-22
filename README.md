@@ -27,8 +27,10 @@ Download (Extras):
 
 Configuration the settings for flask can be found on ```config.cfg``` file. Edit it to get your desired settings
 
-```Binary``` folders contains all the web drivers for both mac and windows.
+```Binary``` folders contains all the web drivers for mac, linux and windows.
 
+All the uploaded file and downloaded file will be stored of ```Dump``` Directory of this project. 
+But it can be changed to any location provided on ```config.cfg``` file.
 ## Usage example (Development Environment)
 
 To run the flask project on MAC:
@@ -62,10 +64,14 @@ sudo python app.py
 ## Release History
 
 * 1.0.0
-    * Add: flask web app
+    * Add: flask web app Creation
     * Add: MongoDB integrations
-    * Add: Scrapy framework integrations
-    * Add: helpers library
+    * Add: Selenium integrations
+    * Add: helpers library for csv upload and download
+    * Add: Celery with RabbitMQ added for multi threading task
+## Important Notes
+* Before uploading the list of url for scraping in csv make sure 
+all the scraping url is under same column named "URL" (header)
 
 ## Meta
 

@@ -31,7 +31,7 @@
                     {% if _list_of_jobs %}
                         {% for _job in _list_of_jobs %}
                             <h6>Post Link {{ _job["Post"] }}</h6>
-                            <h6>Post ID {{ _job["_id"] }}</h6>
+                            <h6 id="jobid">Post ID {{ _job["_id"] }}</h6>
                             <!-- Separator -->
                             <div class="w-100 col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
                                 <hr />
@@ -141,11 +141,14 @@
             $(document).ready(function(){
 
                 $("#downloadcsv").click(function(){
+                    var _list = $('#jobid').text();
                     $.ajax({
                         type : 'POST',
                         url : "{{url_for('downloadCSV')}}",
                         contentType: 'application/json;charset=UTF-8',
-                        data : {'data':"csv data here"}
+                        data: JSON.stringify (_list),
+                        success: function(data) { console.log('data: ' + data); },
+                        dataType: 'json'
                     });
                 });
             });
