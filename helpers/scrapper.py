@@ -3,10 +3,11 @@
 __author__ = "Ashiquzzaman Khan"
 __desc__ = "scraper helper file"
 """
-
+import os
 import time
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -25,35 +26,26 @@ __all__ = [
 
 LOGIN_URL = "https://m.facebook.com/"
 
-def get_driver(_os, _browser):
+def get_driver(_os):
     """
     functions to get the driver with options
     :param _os: string name of the operating system
     :param _browser: string name of the browser
     :return: the web driver object with customized options
     """
+    options = webdriver.ChromeOptions()
+    options.add_argument('headless')
+    capabilities = DesiredCapabilities.CHROME.copy()
+    capabilities['acceptSslCerts'] = True
+    capabilities['acceptInsecureCerts'] = True
     if _os == "mac":
-        if _browser == "chrome":
-            return webdriver.Chrome(executable_path="./Binary/mac/chromedriver")
-        elif _browser == "firefox":
-            return webdriver.Firefox(executable_path="./Binary/mac/geckodriver")
-        elif _browser == "opera":
-            return webdriver.Opera(executable_path="./Binary/mac/operadriver")
+        _executable = os.path.abspath('./Binary/mac/chromedriver')
     elif _os == "windows":
-        if _browser == "chrome":
-            return webdriver.Chrome(executable_path="./Binary/windows/chromedriver.exe")
-        elif _browser == "firefox":
-            return webdriver.Firefox(executable_path="./Binary/windows/geckodriver.exe")
-        if _browser == "opera":
-            return webdriver.Opera(executable_path="./Binary/windows/operadriver.exe")
+        _executable = os.path.abspath('./Binary/windows/chromedriver.exe')
     elif _os == "linux":
-        if _browser == "chrome":
-            return webdriver.Chrome(executable_path="./Binary/linux/chromedriver")
-        elif _browser == "firefox":
-            return webdriver.Firefox(executable_path="./Binary/linux/geckodriver")
-        if _browser == "opera":
-            return webdriver.Opera(executable_path="./Binary/linux/operadriver")
+        _executable = os.path.abspath('./Binary/linux/chromedriver')
 
+    return webdriver.Chrome(chrome_options=options, executable_path=_executable, desired_capabilities=capabilities)
 
 def close(_driver):
     """

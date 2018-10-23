@@ -64,10 +64,10 @@
                             <label id="os" ></label>
                             <input type="hidden" name="idvalue" value="">
                         </div>
-                        <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">
-                            <label>Browser: </label>
-                            <label id="browser"></label>
-                        </div>
+{#                        <div class="col-6 col-sm-6 col-md-6 col-lg-6 col-xl-6">#}
+{#                            <label>Browser: </label>#}
+{#                            <label id="browser"></label>#}
+{#                        </div>#}
                     </div>
                 </div>
                 <!-- Range for timeout-->
@@ -185,11 +185,11 @@
                         if ($(this).val() == _data[i]["user"]){
                             $("label[id='os']").html(_data[i]["os"]);
                             $("input[name='idvalue']").val(_data[i]["_id"]);
-                            $("label[id='browser']").html(_data[i]["browser"]);
+                            {#$("label[id='browser']").html(_data[i]["browser"]);#}
                         } else if ($(this).val() == "None"){
                             $("label[id='os']").html("Not Available");
                             $("input[name='idvalue']").val("None");
-                            $("label[id='browser']").html("Not Available");
+                            {#$("label[id='browser']").html("Not Available");#}
                         }
                     }
                 });

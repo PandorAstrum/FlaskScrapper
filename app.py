@@ -39,14 +39,13 @@ def index():
     if request.method == "POST":
         if request.form.get("userprofile") == "new":        # get if new or edit
             _os = request.form.get("MacWinNew")             # get the os
-            _browser = request.form.get("browserNew")       # get the browser
+            # _browser = request.form.get("browserNew")       # get the browser
             _username = request.form.get("usernameNew")     # get the username
             _password = request.form.get("passwordNew")     # get the password
             _data = {
                 "user": _username,
                 "pass": _password,
                 "os": _os,
-                "browser": _browser,
                 "timeStamp": str(get_curr_date_time())
             }
             _users_collections.insert_one(_data)            # save it to mongo
@@ -54,14 +53,13 @@ def index():
             _selections = request.form.get("selections")    # get selection values from front end
             _get_user = _users_collections.find_one({"user": _selections})  # find matching documents from mongo
             _os = request.form.get("MacWinEdit")            # get the os
-            _browser = request.form.get("browserEdit")      # get the browser
+            # _browser = request.form.get("browserEdit")      # get the browser
             _username = request.form.get("usernameEdit")    # get the username
             _password = request.form.get("passwordEdit")    # get the password
             _users_collections.find_one_and_update({"_id": _get_user["_id"]},
                                                    {"$set": {"user": _username,
                                                              "pass": _password,
-                                                             "os": _os,
-                                                             "browser": _browser}})
+                                                             "os": _os}})
 
     _all_jobs_document = list(_jobs_collections.find())     # get all the documents from jobs collections
     _all_users_document = list(_users_collections.find())   # get all the documents from user collections
@@ -232,7 +230,7 @@ def scrapping_task(self, _idvalue, _timeout,  _scrapLink):
     _get_user = _users_collections.find_one({"_id": ObjectId(_idvalue)})  # find matching documents from
     _total = 100
     if _get_user != None:  # error checking when document not found
-        DRIVER = get_driver(_get_user["os"], _get_user["browser"])  # Setup the correct driver
+        DRIVER = get_driver(_get_user["os"])  # Setup the correct driver
         login(DRIVER, _timeout, _get_user["user"], _get_user["pass"])  # try login to facebook
         if DRIVER.current_url == "https://m.facebook.com/login/save-device/?login_source=login#_=_":  # login success
             self.update_state(state='Logging in..',
