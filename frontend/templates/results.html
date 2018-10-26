@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="Ashiquzzaman Khan">
+        <title>Results</title>
+        <!-- Bootstrap core CSS -->
+        <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+        <!-- Custom styles for this template -->
+        <link href="../static/css/style.css" rel="stylesheet">
+    </head>
+    <body style="background-color: #222222;
+    color: #ffffff;">
+        <div class="container">
+            <div class="row" style="justify-content: center;">
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-center">
+                    <h1>Results</h1>
+                </div>
+                <!-- Separator -->
+                <div class="w-100 col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    <hr />
+                </div>
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-center">
+                    <button type="button" class="btn btn-light" onclick="window.location.href='{{ url_for('index') }}';">Back</button>
+                </div>
+
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-center">
+                    {% if _list_of_jobs %}
+                        {% for _job in _list_of_jobs %}
+                            <h6>Post Link {{ _job["Post"] }}</h6>
+                            <h6 id="jobid">Post ID {{ _job["_id"] }}</h6>
+                            <!-- Separator -->
+                            <div class="w-100 col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                <hr />
+                            </div>
+                            <h6>Comments</h6>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Commenters Name</th>
+                                        <th>Profile Details<br></th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                {% for key, val in _job["Commenters"].items() %}
+                                    <tr>
+                                        <th scope="row">{{ loop.index }}</th>
+                                        <td>{{ key }}</td>
+
+                                        <td><table >
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Likes</th>
+                                                    <th>URL</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for i in val.keys() %}
+                                                <tr>
+                                                    <th scope="row">{{ loop.index }}</th>
+                                                    <td>{{ i }}</td>
+                                                    <td>{{ val[i] }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <!-- Separator -->
+                            <div class="w-100 col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                            <hr />
+                        </div>
+                            <h6>Likes</h6>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Likers Name</th>
+                                        <th>Profile Details<br></th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                {% for key, val in _job["Likers"].items() %}
+                                    <tr>
+                                        <th scope="row">{{ loop.index }}</th>
+                                        <td>{{ key }}</td>
+
+                                        <td><table >
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Likes</th>
+                                                    <th>URL</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for i in val.keys() %}
+                                                <tr>
+                                                    <th scope="row">{{ loop.index }}</th>
+                                                    <td>{{ i }}</td>
+                                                    <td>{{ val[i] }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table></td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="w-100 col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                    <hr />
+                </div>
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 text-center">
+                    <button type="button" class="btn btn-light" id="downloadcsv">Download CSV</button>
+                </div>
+            </div>
+        </div>
+        <!-- Bootstrap core JavaScript
+    ================================================== -->
+        <!-- Placed at the end of the document so the pages load faster -->
+        <script src="../static/js/jquery.min.js"></script>
+        <script src="../static/js/popper.js"></script>
+        <script src="../static/js/bootstrap.min.js"></script>
+        <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+        <script src="../static/js/ie10-viewport-bug-workaround.js"></script>
+        <script type="text/javascript">
+            // download button called
+            // get ajax call to get data
+            $(document).ready(function(){
+
+                $("#downloadcsv").click(function(){
+                    var _list = $('#jobid').text();
+                    $.ajax({
+                        type : 'POST',
+                        url : "{{url_for('downloadCSV')}}",
+                        contentType: 'application/json;charset=UTF-8',
+                        data: JSON.stringify (_list),
+                        success: function(data) { console.log('data: ' + data); },
+                        dataType: 'json'
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>
