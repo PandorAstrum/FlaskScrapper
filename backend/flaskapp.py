@@ -14,7 +14,8 @@ from backend.helpers.generic_helpers import ListConverter
 
 APP_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # get the current file path
 TEMPLATE_PATH = os.path.join(APP_PATH, 'frontend\\templates')   # add template folders
-app = Flask(__name__, template_folder=TEMPLATE_PATH)        # the flask app initialization
+STATIC_PATH = os.path.join(APP_PATH, 'frontend\\static')
+app = Flask(__name__, template_folder=TEMPLATE_PATH, static_folder=STATIC_PATH)        # the flask app initialization
 app.jinja_env.auto_reload = True                            # debug: reload jinja templates
 app.jinja_env.cache = {}                                    # remove cache limit (default is 50 templates)
 app.url_map.converters['list'] = ListConverter              # custom list mapper for routes
