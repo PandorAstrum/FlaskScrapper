@@ -13,7 +13,7 @@ itsdangerous==0.24
 Jinja2==2.10
 keyring==15.1.0
 kombu==4.2.1
-lxml==4.2.5
+lxml==4.6.2
 MarkupSafe==1.0
 numpy==1.15.2
 pandas==0.23.4
